@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # Public URLs (프론트엔드→백엔드 접속 주소)
     public_ws_url: str = "ws://localhost:8000"
 
+    # 외부 API
+    dart_api_key: str = ""  # 금감원 DART 기업 검색 API (opendart.fss.or.kr)
+
     # Dev
     mock_llm: bool = False
     log_level: str = "info"

@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { isLoggedIn } from '@/lib/auth';
-import { getReport, type Report, type QuestionReport } from '@/lib/api';
+import { getReport, getTranscript, type Report, type QuestionReport } from '@/lib/api';
 import Link from 'next/link';
 
 function BackIcon() {
@@ -111,6 +111,8 @@ export default function ReportPage() {
   const [report, setReport] = useState<Report | null>(null);
   const [status, setStatus] = useState<'loading' | 'pending' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
+  const [transcript, setTranscript] = useState<Array<{ seq: number; speaker: string; turn_type: string; text: string }>>([]);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const poll = useCallback(async () => {
     try {
@@ -120,6 +122,7 @@ export default function ReportPage() {
       } else {
         setReport(data as Report);
         setStatus('ready');
+        getTranscript(sessionId).then(d => setTranscript(d.turns ?? [])).catch(() => {});
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '리포트를 불러올 수 없습니다.');
@@ -232,6 +235,52 @@ export default function ReportPage() {
             ))}
           </div>
         </div>
+
+        {/* 대화 기록 */}
+        {transcript.length > 0 && (
+          <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+            <button
+              onClick={() => setShowTranscript(v => !v)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div>
+                <h2 className="text-sm font-semibold text-stone-800">대화 기록</h2>
+                <p className="text-xs text-stone-400 mt-0.5">면접 중 나눈 전체 대화를 확인하세요</p>
+              </div>
+              <span className="text-stone-300 shrink-0 ml-4">{showTranscript ? '▲' : '▼'}</span>
+            </button>
+
+            {showTranscript && (
+              <div className="border-t border-stone-100 px-6 py-5 space-y-3 max-h-[600px] overflow-y-auto">
+                {transcript.map((turn) => {
+                  const isInterviewer = turn.speaker === 'interviewer';
+                  return (
+                    <div key={turn.seq} className={`flex ${isInterviewer ? 'justify-start' : 'justify-end'}`}>
+                      {isInterviewer && (
+                        <div className="w-6 h-6 rounded-full bg-stone-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mr-2 mt-1">
+                          AI
+                        </div>
+                      )}
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                        isInterviewer
+                          ? 'bg-stone-100 text-stone-800 rounded-tl-sm'
+                          : 'bg-blue-600 text-white rounded-tr-sm'
+                      }`}>
+                        {turn.turn_type === 'question' && isInterviewer && (
+                          <p className="text-xs font-semibold mb-1 text-stone-500">질문</p>
+                        )}
+                        {turn.turn_type === 'follow_up' && isInterviewer && (
+                          <p className="text-xs font-semibold mb-1 text-stone-400">꼬리질문</p>
+                        )}
+                        {turn.text}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 다시 면접 */}
         <div className="text-center pb-8">

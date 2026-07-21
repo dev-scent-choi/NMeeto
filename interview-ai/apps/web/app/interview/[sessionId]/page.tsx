@@ -134,38 +134,15 @@ function UserAvatar({ isTalking, photoUrl, onPhotoChange }: {
         style={{ animation: isTalking ? 'headBob 0.4s ease-in-out infinite' : 'none' }}>
 
         {photoUrl ? (
-          /* 사진 있음 — 말할 때 입 가리고 열기 (jaw overlay) */
-          <div className="relative w-full h-full">
-            <img src={photoUrl} alt="나" className="w-full h-full object-cover object-top" />
-            {/* 입 부분 열림/닫힘 오버레이 (사진 하단 20%) */}
-            <div
-              className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-stone-800/80 to-transparent transition-all duration-100"
-              style={{
-                height: isTalking ? '0%' : '0%',
-                animation: isTalking ? 'jawOpen 0.25s ease-in-out infinite' : 'none',
-              }}
-            />
-          </div>
+          <img src={photoUrl} alt="나" className="w-full h-full object-cover object-top" />
         ) : (
-          /* 사진 없음 — 기본 실루엣 */
-          <div className="w-full h-full bg-stone-700 flex flex-col items-center justify-end">
-            <svg viewBox="0 0 100 100" className="w-3/4">
-              {/* 머리 */}
-              <circle cx="50" cy="30" r="20" fill="#94a3b8" />
-              {/* 눈 */}
-              <ellipse cx="43" cy="28" rx="2.5" ry="3" fill="white" style={{ animation: isTalking ? 'blink 2.5s infinite' : 'none' }} />
-              <ellipse cx="57" cy="28" rx="2.5" ry="3" fill="white" style={{ animation: isTalking ? 'blink 2.5s 0.1s infinite' : 'none' }} />
-              <circle cx="43" cy="29" r="1.5" fill="#334155" />
-              <circle cx="57" cy="29" r="1.5" fill="#334155" />
-              {/* 입 */}
-              {isTalking ? (
-                <ellipse cx="50" cy="38" rx="5" ry="3" fill="#475569" style={{ animation: 'jawOpen 0.25s ease-in-out infinite' }} />
-              ) : (
-                <path d="M45 37 Q50 40 55 37" stroke="#475569" strokeWidth="2" fill="none" strokeLinecap="round" />
-              )}
-              {/* 몸 */}
-              <path d="M25 100 Q30 65 50 60 Q70 65 75 100Z" fill="#64748b" />
+          /* 사진 없음 — 업로드 유도 */
+          <div className="w-full h-full bg-stone-800 flex flex-col items-center justify-center gap-3 text-stone-400">
+            <svg className="w-10 h-10 opacity-50" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <circle cx="12" cy="13" r="3" />
             </svg>
+            <p className="text-xs text-center px-2 leading-relaxed">사진을 업로드하면<br/>화상 면접이 더 실감납니다</p>
           </div>
         )}
       </div>
