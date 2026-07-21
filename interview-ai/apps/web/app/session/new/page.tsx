@@ -54,8 +54,8 @@ function CompanyAutocomplete({ value, onChange }: { value: string; onChange: (v:
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const filtered = query.trim().length > 0
-    ? COMPANIES.filter(c => c.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
-    : [];
+    ? COMPANIES.filter(c => c.toLowerCase().includes(query.toLowerCase()))
+    : COMPANIES;
 
   const select = (company: string) => {
     setQuery(company);
@@ -76,12 +76,12 @@ function CompanyAutocomplete({ value, onChange }: { value: string; onChange: (v:
       <input
         value={query}
         onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
-        onFocus={() => query.length > 0 && setOpen(true)}
+        onFocus={() => setOpen(true)}
         placeholder="예: 카카오, 쿠팡, 네이버"
         className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
       />
       {open && filtered.length > 0 && (
-        <ul className="absolute z-20 top-full mt-1 w-full bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden">
+        <ul className="absolute z-20 top-full mt-1 w-full bg-white border border-stone-200 rounded-xl shadow-lg overflow-y-auto max-h-60">
           {filtered.map(c => (
             <li key={c}>
               <button
