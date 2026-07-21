@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import get_settings
-from .routers import auth, companies, resumes, sessions, reports, users
+from .routers import admin, auth, companies, resumes, sessions, reports, users
 from .ws.interview import handle_interview_ws
 
 settings = get_settings()
@@ -33,6 +33,7 @@ app.include_router(sessions.router)
 app.include_router(reports.router)
 app.include_router(companies.router)
 app.include_router(users.router)
+app.include_router(admin.router)
 
 
 @app.exception_handler(Exception)

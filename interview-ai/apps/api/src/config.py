@@ -42,6 +42,7 @@ class Settings(BaseSettings):
 
     # 외부 API
     dart_api_key: str = ""  # 금감원 DART 기업 검색 API (opendart.fss.or.kr)
+    admin_secret: str = ""  # 어드민 엔드포인트 인증 키 (빈 값이면 어드민 비활성화)
 
     # Dev
     mock_llm: bool = False

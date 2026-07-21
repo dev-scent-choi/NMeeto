@@ -1,3 +1,3 @@
-from . import auth, companies, resumes, sessions, reports, users
+from . import admin, auth, companies, resumes, sessions, reports, users
 
-__all__ = ["auth", "companies", "resumes", "sessions", "reports", "users"]
+__all__ = ["admin", "auth", "companies", "resumes", "sessions", "reports", "users"]
