@@ -5,6 +5,14 @@ import { isLoggedIn } from '@/lib/auth';
 import { getReport, type Report, type QuestionReport } from '@/lib/api';
 import Link from 'next/link';
 
+function BackIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
 function ScoreRing({ score }: { score: number }) {
   const radius = 44;
   const circumference = 2 * Math.PI * radius;
@@ -149,7 +157,9 @@ export default function ReportPage() {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center flex-col gap-4">
         <p className="text-red-600">{error}</p>
-        <Link href="/dashboard" className="text-sm text-blue-600 hover:underline">대시보드로 돌아가기</Link>
+        <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline">
+          <BackIcon />대시보드로 돌아가기
+        </Link>
       </div>
     );
   }
@@ -163,7 +173,10 @@ export default function ReportPage() {
   return (
     <div className="min-h-screen bg-stone-50">
       <header className="bg-white border-b border-stone-200 px-6 h-14 flex items-center justify-between sticky top-0 z-10">
-        <Link href="/dashboard" className="text-sm text-stone-500 hover:text-stone-800">← 대시보드</Link>
+        <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-800 transition-colors">
+          <BackIcon />
+          대시보드
+        </Link>
         <span className="text-sm font-semibold text-stone-900">면접 리포트</span>
         <span className="text-xs text-stone-400">{date}</span>
       </header>

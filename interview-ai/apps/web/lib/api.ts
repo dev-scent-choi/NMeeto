@@ -65,7 +65,7 @@ export async function patchResumeText(id: string, text: string): Promise<ResumeS
 // ── Sessions ──────────────────────────────────────────────────────────────
 
 export interface SessionConfig {
-  channel?: "text" | "voice";
+  channel?: "text" | "video";
   style?: "normal" | "pressure";
   difficulty?: 1 | 2 | 3;
   duration_min?: number;
