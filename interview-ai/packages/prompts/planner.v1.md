@@ -21,6 +21,9 @@
 [이력서 요약]
 {resume}
 
+[직무 참고 질문 사례 - RAG]
+{rag_context}
+
 ---
 
 출력 JSON 스키마:

@@ -189,3 +189,32 @@ class Consent(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user = relationship("User", back_populates="consents")
+
+
+class KnowledgeChunk(Base):
+    __tablename__ = "knowledge_chunks"
+    id = Column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    role_key = Column(Text, nullable=False, index=True)
+    company_name = Column(Text, nullable=True, index=True)
+    category = Column(Text, nullable=False)
+    question = Column(Text, nullable=False)
+    ideal_answer = Column(Text, nullable=False)
+    keywords = Column(JSONB, nullable=True)
+    quality_score = Column(Numeric(3, 2), default=1.0)
+    source = Column(Text, nullable=False, default="curated")
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class TrainingExample(Base):
+    __tablename__ = "training_examples"
+    id = Column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    session_id = Column(UUID(as_uuid=False), ForeignKey("sessions.id", ondelete="SET NULL"), nullable=True)
+    role_key = Column(Text, nullable=False, index=True)
+    company_name = Column(Text, nullable=True)
+    question = Column(Text, nullable=False)
+    candidate_answer = Column(Text, nullable=False)
+    sub_scores = Column(JSONB, nullable=True)
+    overall_score = Column(Integer, nullable=True)
+    model_answer = Column(Text, nullable=True)
+    is_validated = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

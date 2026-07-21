@@ -64,9 +64,15 @@ async def _check_monthly_cost(user_id: str, db: AsyncSession) -> bool:
 
 async def _build_plan_background(session_id: str, company_name: str, jd: str,
                                   resume_summary: str, n_questions: int, difficulty: int,
-                                  user_id: str, db: AsyncSession):
+                                  user_id: str, db: AsyncSession, role: str = ""):
     try:
-        result = await build_question_plan(company_name, jd, resume_summary, n_questions, difficulty)
+        # RAG: 직무 관련 참고 질문 사례 검색
+        from ..rag.knowledge import search_chunks, format_rag_context
+        rag_chunks = await search_chunks(db, role_key=role or company_name, company_name=company_name, limit=6)
+        rag_ctx = format_rag_context(rag_chunks)
+
+        result = await build_question_plan(company_name, jd, resume_summary, n_questions, difficulty,
+                                           rag_context=rag_ctx)
         if result is None:
             # 폴백: 일반 질문 사용
             plan = _fallback_plan(role="개발자")
@@ -170,7 +176,7 @@ async def create_session(
         _build_plan_background,
         session.id, body.company_name,
         body.jd_text or "", resume_summary,
-        n_questions, difficulty, user.id, db,
+        n_questions, difficulty, user.id, db, body.role,
     )
 
     return {"id": session.id, "state": "planning"}

@@ -285,11 +285,13 @@ export default function InterviewPage() {
   const [isVideo, setIsVideo] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const seq = useRef(0);
   const talkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!isLoggedIn()) { router.push('/login'); return; }
@@ -342,6 +344,15 @@ export default function InterviewPage() {
       case 'state.progress':
         setProgress({ q_index: Number(data.q_index ?? 0), total: Number(data.total ?? 0), remaining_sec: Number(data.remaining_sec ?? 0) });
         break;
+      case 'hint.text': {
+        const text = String(data.text ?? '');
+        if (text) {
+          setHint(text);
+          if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+          hintTimerRef.current = setTimeout(() => setHint(null), 8000);
+        }
+        break;
+      }
       case 'session.paused':  setPaused(true); setWsState('paused'); break;
       case 'session.completed': setWsState('completed'); setTimeout(() => router.push(`/report/${sessionId}`), 2000); break;
       case 'error': setError(String(data.message ?? '오류가 발생했습니다.')); setWsState('error'); break;
@@ -383,6 +394,20 @@ export default function InterviewPage() {
   };
 
   const interviewer = interviewers[0];
+
+  const HintBanner = hint ? (
+    <div className="shrink-0 mx-4 mb-2">
+      <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 shadow-sm">
+        <span className="text-amber-500 text-base mt-0.5 shrink-0">💡</span>
+        <p className="text-sm text-amber-800 leading-relaxed flex-1">{hint}</p>
+        <button onClick={() => setHint(null)} className="text-amber-400 hover:text-amber-600 shrink-0 mt-0.5">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  ) : null;
 
   const AnswerInput = (
     <div className="shrink-0 bg-white border-t border-stone-200 px-5 py-3.5">
@@ -541,6 +566,7 @@ export default function InterviewPage() {
               )}
               <div ref={bottomRef} />
             </div>
+            {HintBanner}
             {AnswerInput}
           </div>
         ) : (
@@ -577,6 +603,7 @@ export default function InterviewPage() {
               )}
               <div ref={bottomRef} />
             </div>
+            {HintBanner}
             {AnswerInput}
           </div>
         )

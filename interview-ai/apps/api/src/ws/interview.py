@@ -22,7 +22,7 @@ from ..models import Report, Resume, Session, Turn, UsageLedger
 from ..services.orchestrator import (
     InterviewSession, SessionCursor,
     advance_cursor, build_question_plan, decide_action,
-    interviewer_says, judge_turn,
+    generate_hint, interviewer_says, judge_turn,
 )
 
 log = structlog.get_logger()
@@ -143,6 +143,38 @@ async def _generate_report_background(session_id: str, user_id: str):
                 report_row.scores = result_data.get("per_question", [])
                 report_row.feedback = result_data
                 report_row.status = "ok"
+
+                # 파인튜닝용 학습 데이터 저장
+                try:
+                    from ..rag.knowledge import save_training_example
+                    q_map: dict[str, str] = {}
+                    if sess.question_plan:
+                        for q_item in sess.question_plan.get("questions", []):
+                            q_map[q_item.get("id", "")] = q_item.get("text", "")
+                    answer_map: dict[str, str] = {}
+                    for t in turns:
+                        if t.turn_type == "answer" and t.question_ref:
+                            answer_map[t.question_ref] = t.text
+                    company = (sess.config or {}).get("company_name", "") if sess.config else ""
+                    for pq in result_data.get("per_question", []):
+                        qid = pq.get("question_id", "")
+                        qtext = q_map.get(qid, "")
+                        ans = answer_map.get(qid, "")
+                        if qtext and ans:
+                            await save_training_example(
+                                db=db,
+                                session_id=session_id,
+                                role_key=sess.role_key,
+                                company_name=company,
+                                question=qtext,
+                                candidate_answer=ans,
+                                sub_scores=pq.get("sub_scores"),
+                                overall_score=pq.get("score"),
+                                model_answer=pq.get("improved_answer_example"),
+                            )
+                    await db.commit()
+                except Exception as ex:
+                    log.warning("training_example_save_failed", error=str(ex))
             else:
                 report_row.status = "failed"
 
@@ -279,6 +311,17 @@ async def handle_interview_ws(websocket: WebSocket, ticket: str):
                 log.info("turn_decided", session_id=session_id, q_index=isession.cursor.q_index,
                          quality=judge.get("answer_quality"), proposed=judge.get("action"),
                          decided=decided, judge_ms=int((time.time() - t0) * 1000))
+
+                # 실시간 힌트 생성 (비차단 — 실패해도 면접 계속)
+                try:
+                    hint_text, hint_cost = await generate_hint(
+                        q["text"], answer_text, judge.get("answer_quality", "adequate")
+                    )
+                    isession.total_cost_usd += hint_cost
+                    if hint_text:
+                        await _emit(websocket, "hint.text", {"text": hint_text})
+                except Exception:
+                    pass
 
                 await _update_session_cursor(db, session_id, isession.cursor, judge_cost + cost)
 

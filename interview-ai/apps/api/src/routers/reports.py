@@ -27,6 +27,8 @@ def _enrich_report(report: Report, session: Session) -> dict:
         {
             "question": q_map.get(item.get("question_id", ""), item.get("question_id", "")),
             "score": item.get("score", 0),
+            "sub_scores": item.get("sub_scores"),
+            "per_dimension": item.get("per_dimension"),
             "feedback": item.get("reasoning", ""),
             "improved_answer": item.get("improved_answer_example"),
             "star_coverage": item.get("star_coverage"),

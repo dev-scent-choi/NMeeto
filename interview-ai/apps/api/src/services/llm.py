@@ -22,6 +22,7 @@ MODELS = {
     "judge": settings.model_judge,
     "evaluator": settings.model_planner,
     "resume_summarizer": settings.model_judge,
+    "hint": settings.model_judge,  # 경량 모델, 실시간 응답
 }
 
 # USD per 1M tokens (input, output)
@@ -65,6 +66,7 @@ MOCK_RESPONSES: dict[str, str] = {
         "jd_coverage": [],
     }),
     "resume_summarizer": "백엔드 개발자 3년 경력. Python/Django 주력. 트래픽 최적화 경험.",
+    "hint": "답변에서 구체적인 수치나 결과를 추가하면 설득력이 높아집니다. 예를 들어 '응답시간이 30% 개선되었습니다'처럼 결과를 명시해 보세요.",
 }
 
 

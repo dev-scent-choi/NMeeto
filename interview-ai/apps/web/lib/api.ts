@@ -109,9 +109,18 @@ export async function getTranscript(sessionId: string) {
 
 // ── Reports ───────────────────────────────────────────────────────────────
 
+export interface SubScores {
+  logic: number;       // 1-5
+  specificity: number; // 1-5
+  communication: number; // 1-5
+  star: number;        // 1-5
+}
+
 export interface QuestionReport {
   question: string;
   score: number;
+  sub_scores?: SubScores | null;
+  per_dimension?: { logic: string; specificity: string; communication: string; star: string } | null;
   feedback: string;
   improved_answer?: string | null;
   star_coverage?: { situation: boolean; task: boolean; action: boolean; result: boolean } | null;

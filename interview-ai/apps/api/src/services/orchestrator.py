@@ -100,17 +100,26 @@ class InterviewSession:
 async def build_question_plan(
     company: str, jd: str, resume_summary: str,
     n_questions: int, difficulty: int,
+    rag_context: str = "(참고 사례 없음)",
 ) -> Optional[tuple[dict, float]]:
     prompt = load_prompt(
         "planner.v1",
         company=company, jd=jd, resume=resume_summary,
         n_questions=n_questions, difficulty=difficulty,
+        rag_context=rag_context,
     )
     plan, cost, _ = await call_json("planner", prompt, max_tokens=3000)
     if plan is None:
         log.error("question_plan_build_failed")
         return None
     return plan, cost
+
+
+async def generate_hint(question: str, answer: str, quality: str) -> tuple[str, float]:
+    """실시간 힌트 생성 (경량 모델, 지연 민감)."""
+    prompt = load_prompt("hint.v1", question=question, answer=answer, quality=quality)
+    text, cost, _ = await call("hint", prompt, max_tokens=150, temperature=0.7)
+    return text, cost
 
 
 async def judge_turn(
