@@ -131,12 +131,18 @@ async def _generate_report_background(session_id: str, user_id: str):
             db.add(report_row)
             await db.commit()
 
+            from ..rag.knowledge import search_chunks, format_rag_context as _fmt
+            rag_chunks = await search_chunks(db, role_key=sess.role_key,
+                                             company_name=(sess.config or {}).get("company_name", ""))
+            rag_ctx = _fmt(rag_chunks)
+
             prompt = load_prompt(
                 "evaluator.v1",
                 role=sess.role_key,
                 jd=sess.jd_text or "",
                 transcript=transcript,
                 plan=json.dumps(sess.question_plan or {}, ensure_ascii=False),
+                rag_context=rag_ctx,
             )
             result_data, cost, _ = await call_json("evaluator", prompt, max_tokens=4000)
             if result_data:
